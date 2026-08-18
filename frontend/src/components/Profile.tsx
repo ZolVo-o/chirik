@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
-import { Tweet, User } from '../types';
+import { Tweet } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Edit2, Check, X, Calendar } from 'lucide-react';
+import { Camera, Edit2, Check, X, Calendar, Heart, Eye } from 'lucide-react';
 
 export const Profile: React.FC = () => {
-  const { user, logout, login } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,6 @@ export const Profile: React.FC = () => {
   const handleSave = async () => {
     try {
       const updatedUser = await api.updateProfile(editName, editBio);
-      // Обновляем пользователя в контексте
       if (user) {
         user.name = updatedUser.name;
         user.bio = updatedUser.bio;
@@ -81,16 +80,16 @@ export const Profile: React.FC = () => {
   if (!user) return null;
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+    <div className="max-w-3xl mx-auto">
+      <div className="bg-white rounded-2xl shadow-sm border border-blue-100/50 overflow-hidden">
         <div className="h-32 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
         
         <div className="px-6 pb-6 relative">
           <div className="relative -mt-12 mb-4">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg shadow-blue-500/25">
               {user.name?.charAt(0) || 'U'}
             </div>
-            <button className="absolute bottom-0 right-0 p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition">
+            <button className="absolute bottom-0 right-0 p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition shadow-md">
               <Camera className="w-4 h-4" />
             </button>
           </div>
@@ -100,13 +99,13 @@ export const Profile: React.FC = () => {
               <>
                 <button
                   onClick={handleCancel}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition flex items-center gap-1"
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition flex items-center gap-1 text-sm"
                 >
                   <X className="w-4 h-4" /> Отмена
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition flex items-center gap-1"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition flex items-center gap-1 text-sm"
                 >
                   <Check className="w-4 h-4" /> Сохранить
                 </button>
@@ -115,13 +114,13 @@ export const Profile: React.FC = () => {
               <>
                 <button
                   onClick={handleEdit}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition flex items-center gap-1"
+                  className="px-4 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition flex items-center gap-1 text-sm"
                 >
                   <Edit2 className="w-4 h-4" /> Редактировать
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-1"
+                  className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-1 text-sm"
                 >
                   <X className="w-4 h-4" /> Выйти
                 </button>
@@ -135,20 +134,20 @@ export const Profile: React.FC = () => {
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Имя"
               />
               <textarea
                 value={editBio}
                 onChange={(e) => setEditBio(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 rows={2}
                 placeholder="О себе"
               />
             </div>
           ) : (
             <>
-              <h2 className="text-2xl font-bold">{user.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
               <p className="text-gray-500">@{user.username}</p>
               <p className="mt-2 text-gray-700">{user.bio || '✍️ Пока ничего не рассказал о себе'}</p>
             </>
@@ -156,15 +155,15 @@ export const Profile: React.FC = () => {
 
           <div className="flex gap-6 mt-4 text-sm">
             <div>
-              <span className="font-bold">{tweets.length}</span>
+              <span className="font-bold text-gray-800">{tweets.length}</span>
               <span className="text-gray-500 ml-1">твитов</span>
             </div>
             <div>
-              <span className="font-bold">{followers.length}</span>
+              <span className="font-bold text-gray-800">{followers.length}</span>
               <span className="text-gray-500 ml-1">читателей</span>
             </div>
             <div>
-              <span className="font-bold">{following.length}</span>
+              <span className="font-bold text-gray-800">{following.length}</span>
               <span className="text-gray-500 ml-1">читает</span>
             </div>
           </div>
@@ -181,23 +180,27 @@ export const Profile: React.FC = () => {
       </div>
 
       <div className="mt-6">
-        <h3 className="text-xl font-bold mb-4">Твиты</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Мои твиты</h3>
         
         {loading ? (
           <div className="text-center text-gray-400 py-8">Загрузка...</div>
         ) : tweets.length === 0 ? (
-          <div className="text-center text-gray-400 py-12 bg-white rounded-xl shadow">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-blue-100/50">
             <p className="text-4xl mb-2">🐦</p>
-            <p>У вас пока нет твитов</p>
-            <p className="text-sm">Напишите что-нибудь!</p>
+            <p className="text-gray-400">У вас пока нет твитов</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {tweets.map((tweet) => (
-              <div key={tweet.id} className="bg-white rounded-xl shadow p-4 hover:shadow-md transition">
-                <p className="text-gray-800">{tweet.content}</p>
-                <div className="mt-2 flex items-center gap-4 text-sm text-gray-400">
-                  <span>❤️ {tweet.likes}</span>
+              <div key={tweet.id} className="bg-white rounded-2xl shadow-sm p-5 border border-blue-100/50">
+                <p className="text-gray-700">{tweet.content}</p>
+                <div className="mt-3 flex items-center gap-4 text-sm text-gray-400">
+                  <span className="flex items-center gap-1">
+                    <Heart className="w-4 h-4" /> {tweet.likes}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="w-4 h-4" /> {tweet.views || 0}
+                  </span>
                   <span>{new Date(tweet.created_at).toLocaleString('ru')}</span>
                 </div>
               </div>
