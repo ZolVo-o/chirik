@@ -1,0 +1,19 @@
+# База данных
+*.db
+
+# Логи
+*.log
+
+# Архивы
+*.tar.gz
+*.zip
+
+# Сборка фронтенда
+frontend/node_modules/
+frontend/build/
+web/
+
+# Go
+chirik
+*.exe
+*.test
