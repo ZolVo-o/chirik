@@ -93,6 +93,12 @@ export const api = {
     });
   },
 
+  async viewTweet(tweetId: number) {
+    return this.request(`/tweets/view/${tweetId}`, {
+      method: 'POST',
+    });
+  },
+
   async follow(userId: number) {
     return this.request(`/follow/${userId}`, {
       method: 'POST',

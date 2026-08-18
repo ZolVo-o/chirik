@@ -13,6 +13,7 @@ export interface Tweet {
   username: string;
   content: string;
   likes: number;
+  views: number;
   created_at: string;
 }
 

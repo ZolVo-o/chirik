@@ -14,7 +14,6 @@ export const Feed: React.FC = () => {
   const loadTweets = async () => {
     try {
       const data = await api.getTweets();
-      // Защита от null — всегда делаем массив
       setTweets(data || []);
     } catch (error) {
       console.error('Error loading tweets:', error);
@@ -36,12 +35,18 @@ export const Feed: React.FC = () => {
     }
   };
 
+  const handleView = async (tweetId: number) => {
+    try {
+      await api.viewTweet(tweetId);
+      loadTweets();
+    } catch (error) {
+      console.error('Error viewing tweet:', error);
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8 text-gray-400">Загрузка...</div>;
   }
-
-  // Защита от null
-  const safeTweets = tweets || [];
 
   return (
     <div className="max-w-2xl mx-auto p-4">
@@ -60,7 +65,7 @@ export const Feed: React.FC = () => {
             <span className="text-sm text-gray-400">{content.length}/280</span>
             <button
               type="submit"
-              className="gradient-bg text-white px-6 py-2 rounded-xl font-semibold hover:opacity-90 transition"
+              className="bg-blue-500 text-white px-6 py-2 rounded-xl font-semibold hover:bg-blue-600 transition"
             >
               Чирикнуть 🐦
             </button>
@@ -68,15 +73,19 @@ export const Feed: React.FC = () => {
         </form>
       </div>
 
-      {safeTweets.length === 0 ? (
+      {tweets.length === 0 ? (
         <div className="text-center text-gray-400 py-12">
           <p className="text-4xl mb-2">🐦</p>
           <p>Нет твитов</p>
           <p className="text-sm">Будьте первым!</p>
         </div>
       ) : (
-        safeTweets.map((tweet) => (
-          <div key={tweet.id} className="bg-white rounded-xl shadow p-4 mb-3">
+        tweets.map((tweet) => (
+          <div 
+            key={tweet.id} 
+            className="bg-white rounded-xl shadow p-4 mb-3 hover:shadow-md transition cursor-pointer"
+            onClick={() => handleView(tweet.id)}
+          >
             <div className="flex items-center gap-2">
               <span className="font-bold">{tweet.username}</span>
               <span className="text-gray-400 text-sm">
@@ -84,20 +93,17 @@ export const Feed: React.FC = () => {
               </span>
             </div>
             <p className="mt-2">{tweet.content}</p>
-            <div className="mt-3 flex items-center gap-4">
+            <div className="mt-3 flex items-center gap-4 text-sm text-gray-400">
               <button
-                onClick={async () => {
-                  try {
-                    await api.likeTweet(tweet.id);
-                    loadTweets();
-                  } catch (e) {
-                    console.error('Error liking tweet:', e);
-                  }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  api.likeTweet(tweet.id).then(() => loadTweets());
                 }}
-                className="text-gray-400 hover:text-red-500 transition"
+                className="hover:text-red-500 transition"
               >
                 ❤️ {tweet.likes}
               </button>
+              <span>👁️ {tweet.views || 0}</span>
             </div>
           </div>
         ))
