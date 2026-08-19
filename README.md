@@ -16,7 +16,7 @@ export CHIRIK_REALTIME_SECRET="внутренний-секрет-для-связ
 go run ./cmd/server
 ```
 
-Сервер доступен на `http://localhost:8080`. В локальном режиме база данных создаётся в `./chirik.db`; для телефона пути задаются через `CHIRIK_DATA_DIR` и описаны в [`DEPLOYMENT.md`](./DEPLOYMENT.md).
+Сервер доступен на `http://localhost:8080`. В режиме телефона он слушает `127.0.0.1:8080`, а Cloudpub публикует его наружу.
 
 ## Запуск frontend
 

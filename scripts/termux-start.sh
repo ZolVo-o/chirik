@@ -35,4 +35,4 @@ else
   echo $! > "$DATA_DIR/server.pid"
 fi
 
-echo "Chirik доступен по адресу: http://IP_ТЕЛЕФОНА:8080"
+echo "Chirik доступен локально: http://localhost:8080"
