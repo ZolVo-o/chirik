@@ -1,93 +1,125 @@
 package main
 
 import (
-    "context"
-    "log"
-    "net/http"
-    "os"
-    "os/signal"
-    "strings"
-    "syscall"
-    "time"
-    "chirik/internal/handlers"
-    "chirik/internal/middleware"
-    "chirik/internal/repository"
-    "chirik/internal/router"
+	"chirik/internal/handlers"
+	"chirik/internal/middleware"
+	"chirik/internal/realtime"
+	"chirik/internal/repository"
+	"chirik/internal/router"
+	"context"
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"strings"
+	"syscall"
+	"time"
 )
 
 func main() {
-    // База данных
-    repo, err := repository.New("./chirik.db")
-    if err != nil {
-        log.Fatal("Database error:", err)
-    }
-    defer repo.Close()
+	if len(os.Getenv("CHIRIK_JWT_SECRET")) < 32 {
+		log.Fatal("CHIRIK_JWT_SECRET must contain at least 32 characters")
+	}
 
-    // Handlers
-    authHandler := handlers.NewAuthHandler(repo)
-    tweetHandler := handlers.NewTweetHandler(repo)
-    followHandler := handlers.NewFollowHandler(repo)
+	dataDir := envOr("CHIRIK_DATA_DIR", ".")
+	if err := os.MkdirAll(dataDir, 0o700); err != nil {
+		log.Fatal("Data directory error:", err)
+	}
+	dbPath := envOr("CHIRIK_DB_PATH", filepath.Join(dataDir, "chirik.db"))
+	webDir := envOr("CHIRIK_WEB_DIR", "./web")
 
-    // Router (API)
-    r := router.Setup(authHandler, tweetHandler, followHandler)
+	// База данных хранится отдельно от каталога приложения, чтобы обновления не затронули данные.
+	repo, err := repository.New(dbPath)
+	if err != nil {
+		log.Fatal("Database error:", err)
+	}
+	defer repo.Close()
+	realtimePublisher := realtime.NewHTTPPublisher(os.Getenv("CHIRIK_REALTIME_URL"), os.Getenv("CHIRIK_REALTIME_SECRET"))
 
-    // Middleware для API
-    apiHandler := middleware.CORS(r)
+	// Handlers
+	authHandler := handlers.NewAuthHandler(repo)
+	tweetHandler := handlers.NewTweetHandler(repo, realtimePublisher)
+	followHandler := handlers.NewFollowHandler(repo, realtimePublisher)
+	messageHandler := handlers.NewMessageHandler(repo, realtimePublisher)
+	usersHandler := handlers.NewUsersHandler(repo)
 
-    // Основной мультиплексор
-    mux := http.NewServeMux()
+	// Router (API)
+	r := router.Setup(authHandler, tweetHandler, followHandler, messageHandler, usersHandler)
 
-    // API маршруты
-    mux.Handle("/api/", apiHandler)
+	// Middleware для API
+	apiHandler := middleware.CORS(r)
 
-    // Статические файлы (React build)
-    fileServer := http.FileServer(http.Dir("./web"))
-    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        // Если запрос к API — пропускаем
-        if strings.HasPrefix(r.URL.Path, "/api/") {
-            http.NotFound(w, r)
-            return
-        }
+	// Основной мультиплексор
+	mux := http.NewServeMux()
 
-        // Проверяем, существует ли файл
-        filePath := "./web" + r.URL.Path
-        if _, err := os.Stat(filePath); err == nil {
-            fileServer.ServeHTTP(w, r)
-            return
-        }
+	// Один внешний порт: realtime остаётся внутренним и доступен через /events.
+	realtimeURL, err := url.Parse(envOr("CHIRIK_REALTIME_PROXY_URL", "http://127.0.0.1:8090"))
+	if err != nil {
+		log.Fatal("Realtime proxy URL error:", err)
+	}
+	mux.Handle("/events", httputil.NewSingleHostReverseProxy(realtimeURL))
 
-        // Для всех остальных путей — отдаём index.html (React Router)
-        http.ServeFile(w, r, "./web/index.html")
-    })
+	// API маршруты
+	mux.Handle("/api/", apiHandler)
 
-    // Сервер
-    srv := &http.Server{
-        Addr:    ":8080",
-        Handler: mux,
-    }
+	// Статические файлы (React build)
+	fileServer := http.FileServer(http.Dir(webDir))
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Если запрос к API — пропускаем
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			http.NotFound(w, r)
+			return
+		}
 
-    log.Println("🚀 Чирик запущен на http://localhost:8080")
-    log.Println("📱 Открой в браузере: http://localhost:8080")
+		// Проверяем, существует ли файл
+		filePath := filepath.Join(webDir, filepath.Clean("/"+r.URL.Path))
+		if _, err := os.Stat(filePath); err == nil {
+			fileServer.ServeHTTP(w, r)
+			return
+		}
 
-    // Graceful shutdown
-    stop := make(chan os.Signal, 1)
-    signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+		// Для всех остальных путей — отдаём index.html (React Router)
+		http.ServeFile(w, r, filepath.Join(webDir, "index.html"))
+	})
 
-    go func() {
-        if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            log.Fatal("Server error:", err)
-        }
-    }()
+	// Сервер
+	srv := &http.Server{
+		Addr:    envOr("CHIRIK_SERVER_ADDR", ":8080"),
+		Handler: mux,
+	}
 
-    <-stop
-    log.Println("⏳ Останавливаем сервер...")
+	log.Printf("🚀 Чирик запущен на %s", srv.Addr)
+	log.Println("📱 Открой в браузере по IP телефона и порту сервера")
 
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-    defer cancel()
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
-    if err := srv.Shutdown(ctx); err != nil {
-        log.Fatal("Shutdown error:", err)
-    }
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal("Server error:", err)
+		}
+	}()
 
-    log.Println("✅ Сервер остановлен")
+	<-stop
+	log.Println("⏳ Останавливаем сервер...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Shutdown error:", err)
+	}
+
+	log.Println("✅ Сервер остановлен")
+}
+
+func envOr(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
 }

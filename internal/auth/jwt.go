@@ -1,43 +1,63 @@
 package auth
 
 import (
-    "errors"
-    "time"
-    "github.com/golang-jwt/jwt/v5"
+	"errors"
+	"github.com/golang-jwt/jwt/v5"
+	"os"
+	"time"
 )
 
 type Claims struct {
-    UserID int `json:"user_id"`
-    jwt.RegisteredClaims
+	UserID int `json:"user_id"`
+	jwt.RegisteredClaims
 }
 
-var jwtSecret = []byte("chirik_secret_key_2024")
+func jwtSecret() ([]byte, error) {
+	secret := os.Getenv("CHIRIK_JWT_SECRET")
+	if len(secret) < 32 {
+		return nil, errors.New("CHIRIK_JWT_SECRET must contain at least 32 characters")
+	}
+	return []byte(secret), nil
+}
 
 func GenerateToken(userID int) (string, error) {
-    claims := Claims{
-        UserID: userID,
-        RegisteredClaims: jwt.RegisteredClaims{
-            ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-            IssuedAt:  jwt.NewNumericDate(time.Now()),
-        },
-    }
+	secret, err := jwtSecret()
+	if err != nil {
+		return "", err
+	}
 
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString(jwtSecret)
+	claims := Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(secret)
 }
 
 func ValidateToken(tokenString string) (*Claims, error) {
-    token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-        return jwtSecret, nil
-    })
+	secret, err := jwtSecret()
+	if err != nil {
+		return nil, err
+	}
 
-    if err != nil {
-        return nil, err
-    }
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if token.Method != jwt.SigningMethodHS256 {
+			return nil, errors.New("unexpected signing method")
+		}
+		return secret, nil
+	})
 
-    if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-        return claims, nil
-    }
+	if err != nil {
+		return nil, err
+	}
 
-    return nil, errors.New("invalid token")
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid token")
 }

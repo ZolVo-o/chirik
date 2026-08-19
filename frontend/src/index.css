@@ -5,8 +5,8 @@
 @layer base {
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #e6f0fa;
-    color: #0f172a;
+    background: #f4f1eb;
+    color: #17202a;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -16,47 +16,55 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #dbeafe;
+    background: #e8e2d8;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #93c5fd;
+    background: #c3b8a8;
     border-radius: 8px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #60a5fa;
+    background: #ef765e;
   }
 }
 
 @layer components {
   .gradient-bg {
-    @apply bg-gradient-to-r from-blue-500 to-cyan-500;
+    @apply bg-gradient-to-br from-[#f27b63] via-[#e86662] to-[#b74668];
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-[#ef765e] to-[#b74668] bg-clip-text text-transparent;
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5;
+    @apply transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
   }
 
   .btn-primary {
-    @apply bg-blue-500 text-white font-semibold py-2 px-6 rounded-full 
-           transition-all duration-300 hover:bg-blue-600 hover:scale-[1.02] 
+    @apply bg-[#17202a] text-white font-semibold py-2 px-6 rounded-full
+           transition-all duration-300 hover:bg-[#ef765e] hover:scale-[1.02]
            active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-outline {
-    @apply border-2 border-blue-500 text-blue-500 font-semibold py-2 px-6 rounded-full 
-           transition-all duration-300 hover:bg-blue-500 hover:text-white 
+    @apply border-2 border-[#17202a] text-[#17202a] font-semibold py-2 px-6 rounded-full
+           transition-all duration-300 hover:bg-[#17202a] hover:text-white
            active:scale-95;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl 
-           focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 
-           transition-all duration-300 text-gray-800 placeholder:text-gray-400;
+    @apply w-full px-4 py-3 bg-[#f8f6f1] border-2 border-[#e5ded4] rounded-2xl
+           focus:outline-none focus:border-[#ef765e] focus:ring-4 focus:ring-[#ef765e]/15
+           transition-all duration-300 text-[#17202a] placeholder:text-[#9d958b];
+  }
+
+  .surface {
+    @apply bg-white/80 border border-[#e7dfd4] shadow-[0_18px_50px_rgba(37,31,26,0.07)] backdrop-blur-xl;
+  }
+
+  .section-label {
+    @apply text-[11px] uppercase tracking-[0.22em] font-bold text-[#ef765e];
   }
 }

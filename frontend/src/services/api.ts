@@ -1,4 +1,4 @@
-import { User, Tweet, AuthResponse } from '../types';
+import { User, Tweet, AuthResponse, Conversation, Message } from '../types';
 
 const API_URL = '/api';
 
@@ -34,15 +34,21 @@ export const api = {
       return null as T;
     }
 
+    let data: unknown;
     try {
-      const data = JSON.parse(text);
-      if (!response.ok) {
-        throw new Error(data.error || 'Request failed');
-      }
-      return data;
-    } catch (e) {
+      data = JSON.parse(text);
+    } catch {
       throw new Error('Invalid JSON response');
     }
+
+    if (!response.ok) {
+      const message = typeof data === 'object' && data !== null && 'error' in data
+        ? String(data.error)
+        : 'Request failed';
+      throw new Error(message);
+    }
+
+    return data as T;
   },
 
   async register(username: string, email: string, password: string, name: string) {
@@ -119,5 +125,47 @@ export const api = {
   async getFollowers(userId: number) {
     const result = await this.request<any[]>(`/followers/${userId}`);
     return result || [];
+  },
+
+  async searchUsers(query: string) {
+    const result = await this.request<User[]>(`/users/search?q=${encodeURIComponent(query)}`);
+    return result || [];
+  },
+
+  async getConversations() {
+    const result = await this.request<Conversation[]>('/conversations');
+    return result || [];
+  },
+
+  async createConversation(userId: number) {
+    return this.request<Conversation>('/conversations', {
+      method: 'POST',
+      body: JSON.stringify({ user_id: userId }),
+    });
+  },
+
+  async getMessages(conversationId: number) {
+    const result = await this.request<Message[]>(`/conversations/${conversationId}/messages`);
+    return result || [];
+  },
+
+  async sendMessage(conversationId: number, content: string) {
+    return this.request<Message>(`/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  async updateMessage(messageId: number, content: string) {
+    return this.request<Message>(`/messages/${messageId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  async deleteMessage(messageId: number) {
+    return this.request<Message>(`/messages/${messageId}`, {
+      method: 'DELETE',
+    });
   },
 };

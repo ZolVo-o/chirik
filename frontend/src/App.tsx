@@ -5,6 +5,8 @@ import { Auth } from './components/Auth';
 import { Feed } from './components/Feed';
 import { Profile } from './components/Profile';
 import { Layout } from './components/Layout';
+import { Messenger } from './components/Messenger';
+import { RealtimeProvider } from './contexts/RealtimeContext';
 
 const AppRoutes: React.FC = () => {
   const { user } = useAuth();
@@ -18,6 +20,7 @@ const AppRoutes: React.FC = () => {
       <Routes>
         <Route path="/" element={<Feed />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/messages" element={<Messenger />} />
       </Routes>
     </Layout>
   );
@@ -27,7 +30,9 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <RealtimeProvider>
+          <AppRoutes />
+        </RealtimeProvider>
       </AuthProvider>
     </BrowserRouter>
   );

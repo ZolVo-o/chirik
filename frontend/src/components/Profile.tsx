@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, Edit2, Check, X, Calendar, Heart, Eye } from 'lucide-react';
 
 export const Profile: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,10 +57,7 @@ export const Profile: React.FC = () => {
   const handleSave = async () => {
     try {
       const updatedUser = await api.updateProfile(editName, editBio);
-      if (user) {
-        user.name = updatedUser.name;
-        user.bio = updatedUser.bio;
-      }
+      updateUser(updatedUser);
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -81,15 +78,15 @@ export const Profile: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-sm border border-blue-100/50 overflow-hidden">
-        <div className="h-32 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+      <div className="surface rounded-[30px] overflow-hidden">
+        <div className="h-36 gradient-bg relative"><div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_20%_20%,white,transparent_30%)]" /></div>
         
         <div className="px-6 pb-6 relative">
           <div className="relative -mt-12 mb-4">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg shadow-blue-500/25">
+            <div className="w-24 h-24 rounded-[28px] gradient-bg flex items-center justify-center text-white text-3xl font-bold border-4 border-[#f4f1eb] shadow-lg shadow-[#ef765e]/25">
               {user.name?.charAt(0) || 'U'}
             </div>
-            <button className="absolute bottom-0 right-0 p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition shadow-md">
+              <button className="absolute bottom-0 right-0 p-1.5 bg-[#17202a] text-white rounded-full hover:bg-[#ef765e] transition shadow-md">
               <Camera className="w-4 h-4" />
             </button>
           </div>
@@ -99,13 +96,13 @@ export const Profile: React.FC = () => {
               <>
                 <button
                   onClick={handleCancel}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition flex items-center gap-1 text-sm"
+                  className="btn-outline px-4 py-2 border rounded-full transition flex items-center gap-1 text-sm"
                 >
                   <X className="w-4 h-4" /> Отмена
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition flex items-center gap-1 text-sm"
+                  className="btn-primary px-4 py-2 rounded-full transition flex items-center gap-1 text-sm"
                 >
                   <Check className="w-4 h-4" /> Сохранить
                 </button>
@@ -114,13 +111,13 @@ export const Profile: React.FC = () => {
               <>
                 <button
                   onClick={handleEdit}
-                  className="px-4 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition flex items-center gap-1 text-sm"
+                  className="btn-outline px-4 py-2 rounded-full transition flex items-center gap-1 text-sm"
                 >
                   <Edit2 className="w-4 h-4" /> Редактировать
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition flex items-center gap-1 text-sm"
+                  className="px-4 py-2 bg-[#17202a] text-white rounded-full hover:bg-[#ef765e] transition flex items-center gap-1 text-sm"
                 >
                   <X className="w-4 h-4" /> Выйти
                 </button>
@@ -147,24 +144,25 @@ export const Profile: React.FC = () => {
             </div>
           ) : (
             <>
-              <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
-              <p className="text-gray-500">@{user.username}</p>
-              <p className="mt-2 text-gray-700">{user.bio || '✍️ Пока ничего не рассказал о себе'}</p>
+               <p className="section-label mb-1">Профиль</p>
+               <h2 className="text-3xl font-black tracking-[-0.04em] text-[#17202a]">{user.name}</h2>
+               <p className="text-[#8d857c]">@{user.username}</p>
+               <p className="mt-3 text-[#394550] leading-6">{user.bio || 'Пока ничего не рассказал о себе'}</p>
             </>
           )}
 
           <div className="flex gap-6 mt-4 text-sm">
             <div>
-              <span className="font-bold text-gray-800">{tweets.length}</span>
-              <span className="text-gray-500 ml-1">твитов</span>
+               <span className="font-black text-[#17202a]">{tweets.length}</span>
+               <span className="text-[#8d857c] ml-1">твитов</span>
             </div>
             <div>
-              <span className="font-bold text-gray-800">{followers.length}</span>
-              <span className="text-gray-500 ml-1">читателей</span>
+               <span className="font-black text-[#17202a]">{followers.length}</span>
+               <span className="text-[#8d857c] ml-1">читателей</span>
             </div>
             <div>
-              <span className="font-bold text-gray-800">{following.length}</span>
-              <span className="text-gray-500 ml-1">читает</span>
+               <span className="font-black text-[#17202a]">{following.length}</span>
+               <span className="text-[#8d857c] ml-1">читает</span>
             </div>
           </div>
 
@@ -180,21 +178,21 @@ export const Profile: React.FC = () => {
       </div>
 
       <div className="mt-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Мои твиты</h3>
+           <h3 className="section-label mb-4">Мои твиты</h3>
         
         {loading ? (
           <div className="text-center text-gray-400 py-8">Загрузка...</div>
         ) : tweets.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-blue-100/50">
+           <div className="surface rounded-[26px] p-12 text-center">
             <p className="text-4xl mb-2">🐦</p>
             <p className="text-gray-400">У вас пока нет твитов</p>
           </div>
         ) : (
           <div className="space-y-4">
             {tweets.map((tweet) => (
-              <div key={tweet.id} className="bg-white rounded-2xl shadow-sm p-5 border border-blue-100/50">
-                <p className="text-gray-700">{tweet.content}</p>
-                <div className="mt-3 flex items-center gap-4 text-sm text-gray-400">
+             <div key={tweet.id} className="surface rounded-[26px] p-5">
+                 <p className="text-[#394550] leading-7">{tweet.content}</p>
+                 <div className="mt-3 flex items-center gap-4 text-sm text-[#9d958b]">
                   <span className="flex items-center gap-1">
                     <Heart className="w-4 h-4" /> {tweet.likes}
                   </span>

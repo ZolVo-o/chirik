@@ -42,31 +42,31 @@ export const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#17202a]">
       {/* Анимированный градиентный фон */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-cyan-100 to-blue-50">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#ef765e_0,_transparent_38%),radial-gradient(circle_at_bottom_left,_#687b8b_0,_transparent_35%)] opacity-60">
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-[-40%] left-[-20%] w-[600px] h-[600px] rounded-full bg-blue-400 blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-[-40%] right-[-20%] w-[600px] h-[600px] rounded-full bg-cyan-400 blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-[-40%] left-[-20%] w-[600px] h-[600px] rounded-full bg-[#ef765e] blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-[-40%] right-[-20%] w-[600px] h-[600px] rounded-full bg-[#a84267] blur-3xl animate-pulse delay-1000"></div>
         </div>
       </div>
 
       <div className="relative w-full max-w-md">
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
+        <div className="bg-[#f8f6f1]/95 backdrop-blur-xl rounded-[32px] p-7 sm:p-9 shadow-2xl border border-white/20">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl shadow-lg mb-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 gradient-bg rounded-[24px] shadow-lg shadow-[#ef765e]/25 mb-5 text-3xl">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-extrabold gradient-text">
+            <h1 className="text-4xl font-black tracking-[-0.05em] text-[#17202a]">
               Чирик
             </h1>
-            <p className="text-gray-500 mt-1 font-medium">
+            <p className="text-[#8d857c] mt-2 font-medium">
               {isLogin ? 'Добро пожаловать!' : 'Создайте аккаунт'}
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-xl mb-4 text-sm font-medium">
+            <div className="bg-[#fff0ed] border-l-4 border-[#ef765e] text-[#b7464d] p-3 rounded-xl mb-4 text-sm font-medium">
               {error}
             </div>
           )}
@@ -75,7 +75,7 @@ export const Auth: React.FC = () => {
             {!isLogin && (
               <>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ef765e]" />
                   <input
                     type="text"
                     placeholder="Имя пользователя"
@@ -86,7 +86,7 @@ export const Auth: React.FC = () => {
                   />
                 </div>
                 <div className="relative">
-                  <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                  <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ef765e]" />
                   <input
                     type="text"
                     placeholder="Ваше имя"
@@ -100,7 +100,7 @@ export const Auth: React.FC = () => {
             )}
 
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ef765e]" />
               <input
                 type="email"
                 placeholder="Email"
@@ -112,7 +112,7 @@ export const Auth: React.FC = () => {
             </div>
 
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ef765e]" />
               <input
                 type="password"
                 placeholder="Пароль"
@@ -129,7 +129,7 @@ export const Auth: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50"
+              className="w-full btn-primary py-3 rounded-2xl"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -148,13 +148,13 @@ export const Auth: React.FC = () => {
                 setIsLogin(!isLogin);
                 setError('');
               }}
-              className="text-blue-600 hover:text-blue-800 transition font-semibold"
+              className="text-[#b74668] hover:text-[#ef765e] transition font-semibold"
             >
               {isLogin ? 'Нет аккаунта? → Регистрация' : 'Уже есть аккаунт? → Вход'}
             </button>
           </div>
 
-          <div className="mt-4 text-center text-xs text-gray-400">
+          <div className="mt-4 text-center text-xs text-[#9d958b]">
             {isLogin ? 'Войдите, чтобы продолжить' : 'Присоединяйтесь к сообществу'}
           </div>
         </div>
