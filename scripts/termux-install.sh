@@ -16,6 +16,9 @@ mkdir -p "$HOME/.termux/boot"
 cp "$APP_DIR/scripts/termux-boot.sh" "$HOME/.termux/boot/chirik"
 chmod +x "$HOME/.termux/boot/chirik"
 
+# Пересборка должна заменить уже работающий старый процесс.
+bash "$APP_DIR/scripts/termux-stop.sh" || true
+
 if [ ! -f "$ENV_FILE" ]; then
   cat > "$ENV_FILE" <<EOF
 CHIRIK_JWT_SECRET=$(openssl rand -base64 48 | tr -d '\n')
